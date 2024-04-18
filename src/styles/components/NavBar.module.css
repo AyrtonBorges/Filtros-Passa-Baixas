@@ -1,0 +1,25 @@
+/* components/Navbar.module.css */
+
+.navbar {
+    background-color: #333;
+    padding: 1rem;
+  }
+  
+  .navbarNav {
+    list-style-type: none;
+    display: flex;
+  }
+  
+  .navItem {
+    margin-right: 1rem;
+  }
+  
+  .navLink {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .navLink:hover {
+    text-decoration: underline;
+  }
+  
