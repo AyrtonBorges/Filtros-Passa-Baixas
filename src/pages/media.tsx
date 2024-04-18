@@ -5,7 +5,15 @@ import styles from "../styles/Home.module.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// Função para aplicar o Filtro da Média
+
+/**
+ * Aplica um filtro de média à imagem.
+ * @param {ImageData} imageData Os dados da imagem a serem filtrados.
+ * @param {number} width A largura da imagem.
+ * @param {number} height A altura da imagem.
+ * @param {number} kernelSize O tamanho do kernel do filtro.
+ * @return {*}  {ImageData} Uma nova imagem com o filtro de média aplicado.
+ */
 function applyAverageFilter(
   imageData: ImageData,
   width: number,
@@ -195,11 +203,12 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <h1>Média</h1>
+        <h1>Filtro lineare passa-baixa Média</h1>
         <input type="file" accept="image/*" onChange={handleImageUpload} />
         <label>
           Tamanho do Kernel:
           <input
+            step={2}
             type="number"
             value={kernelSize}
             min={1}

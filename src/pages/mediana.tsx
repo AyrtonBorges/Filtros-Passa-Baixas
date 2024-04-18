@@ -16,51 +16,68 @@ function calculateMedian(values: number[]): number {
 }
 
 // Função para aplicar o Filtro da Mediana
+/**
+ * Aplica um filtro de mediana à imagem.
+ * @param imageData Os dados da imagem a serem filtrados.
+ * @param width A largura da imagem.
+ * @param height A altura da imagem.
+ * @param kernelSize O tamanho do kernel do filtro.
+ * @returns Uma nova imagem com o filtro de mediana aplicado.
+ */
 function applyMedianFilter(
   imageData: ImageData,
   width: number,
   height: number,
   kernelSize: number
 ): ImageData {
-  const outputData = new Uint8ClampedArray(imageData.data);
-  const halfKernelSize = Math.floor(kernelSize / 2);
+  const outputData = new Uint8ClampedArray(imageData.data); // Cria um novo array de bytes para os dados da imagem filtrada, copiando os dados da imagem original
+  const halfKernelSize = Math.floor(kernelSize / 2);        // Calcula a metade do tamanho do kernel
 
+  // Loop pelos pixels verticais e horizontais da imagem, excluindo as bordas
   for (let y = halfKernelSize; y < height - halfKernelSize; y++) {
     for (let x = halfKernelSize; x < width - halfKernelSize; x++) {
-      const pixelIndex = (y * width + x) * 4;
+      const pixelIndex = (y * width + x) * 4; // Calcula o índice do pixel atual no array de dados da imagem (cada pixel tem 4 componentes: RGBA)
 
+      // Inicializa arrays para armazenar os valores de cor dos vizinhos do pixel atual
       const redValues: number[] = [];
       const greenValues: number[] = [];
       const blueValues: number[] = [];
 
+      // Loop pelos vizinhos do pixel atual, incluindo o próprio pixel
       for (let ky = -halfKernelSize; ky <= halfKernelSize; ky++) {
         for (let kx = -halfKernelSize; kx <= halfKernelSize; kx++) {
-          const neighborPixelIndex = ((y + ky) * width + (x + kx)) * 4;
+          const neighborPixelIndex = ((y + ky) * width + (x + kx)) * 4; // Calcula o índice do vizinho atual no array de dados da imagem
 
+          // Armazena os valores de cor do vizinho atual nos arrays correspondentes
           redValues.push(imageData.data[neighborPixelIndex]);
           greenValues.push(imageData.data[neighborPixelIndex + 1]);
           blueValues.push(imageData.data[neighborPixelIndex + 2]);
         }
       }
 
+      // Ordena os arrays de valores de cor
       redValues.sort((a, b) => a - b);
       greenValues.sort((a, b) => a - b);
       blueValues.sort((a, b) => a - b);
 
+      // Calcula os valores medianos de cada componente de cor
       const medianRed = redValues[Math.floor(redValues.length * 0.5)];
       const medianGreen = greenValues[Math.floor(greenValues.length * 0.5)];
       const medianBlue = blueValues[Math.floor(blueValues.length * 0.5)];
 
+      // Atribui os valores medianos de cor ao pixel atual
       outputData[pixelIndex] = medianRed;
       outputData[pixelIndex + 1] = medianGreen;
       outputData[pixelIndex + 2] = medianBlue;
     }
   }
 
-  return new ImageData(outputData, width, height);
+  return new ImageData(outputData, width, height); // Retorna uma nova imagem com o filtro de mediana aplicado
 }
 
+
 // Componente Home
+
 export default function Home() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [originalSave, setOriginalSave] = useState<string | null>(null);
@@ -210,6 +227,7 @@ export default function Home() {
         <label>
           Tamanho do Kernel:
           <input
+            step={2}
             type="number"
             value={kernelSize}
             min={1}

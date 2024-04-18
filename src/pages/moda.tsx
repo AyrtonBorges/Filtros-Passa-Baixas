@@ -5,66 +5,86 @@ import styles from "../styles/Home.module.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// Função para aplicar o Filtro da Moda
-// Função para aplicar o Filtro da Moda
+/**
+ * Aplica um filtro de moda à imagem.
+ * @param imageData Os dados da imagem a serem filtrados.
+ * @param width A largura da imagem.
+ * @param height A altura da imagem.
+ * @param kernelSize O tamanho do kernel do filtro.
+ * @returns Uma nova imagem com o filtro de moda aplicado.
+ */
 function applyModeFilter(imageData: ImageData, width: number, height: number, kernelSize: number): ImageData {
-    const outputData = new Uint8ClampedArray(imageData.data);
-    const halfKernelSize = Math.floor(kernelSize / 2);
+  const outputData = new Uint8ClampedArray(imageData.data); // Cria um novo array de bytes para os dados da imagem filtrada, copiando os dados da imagem original
+  const halfKernelSize = Math.floor(kernelSize / 2); // Calcula a metade do tamanho do kernel
 
-    for (let y = halfKernelSize; y < height - halfKernelSize; y++) {
-        for (let x = halfKernelSize; x < width - halfKernelSize; x++) {
-            const pixelIndex = (y * width + x) * 4;
+  // Loop pelos pixels verticais e horizontais da imagem, excluindo as bordas
+  for (let y = halfKernelSize; y < height - halfKernelSize; y++) {
+      for (let x = halfKernelSize; x < width - halfKernelSize; x++) {
+          const pixelIndex = (y * width + x) * 4; // Calcula o índice do pixel atual no array de dados da imagem (cada pixel tem 4 componentes: RGBA)
 
-            const redValues = [];
-            const greenValues = [];
-            const blueValues = [];
+          // Inicializa arrays para armazenar os valores de cor dos vizinhos do pixel atual
+          const redValues = [];
+          const greenValues = [];
+          const blueValues = [];
 
-            for (let ky = -halfKernelSize; ky <= halfKernelSize; ky++) {
-                for (let kx = -halfKernelSize; kx <= halfKernelSize; kx++) {
-                    const neighborPixelIndex = ((y + ky) * width + (x + kx)) * 4;
+          // Loop pelos vizinhos do pixel atual, incluindo o próprio pixel
+          for (let ky = -halfKernelSize; ky <= halfKernelSize; ky++) {
+              for (let kx = -halfKernelSize; kx <= halfKernelSize; kx++) {
+                  const neighborPixelIndex = ((y + ky) * width + (x + kx)) * 4; // Calcula o índice do vizinho atual no array de dados da imagem
 
-                    redValues.push(imageData.data[neighborPixelIndex]);
-                    greenValues.push(imageData.data[neighborPixelIndex + 1]);
-                    blueValues.push(imageData.data[neighborPixelIndex + 2]);
-                }
-            }
+                  // Armazena os valores de cor do vizinho atual nos arrays correspondentes
+                  redValues.push(imageData.data[neighborPixelIndex]);
+                  greenValues.push(imageData.data[neighborPixelIndex + 1]);
+                  blueValues.push(imageData.data[neighborPixelIndex + 2]);
+              }
+          }
 
-            const modeRed = getMode(redValues);
-            const modeGreen = getMode(greenValues);
-            const modeBlue = getMode(blueValues);
+          // Obtém os valores moda de cada componente de cor
+          const modeRed = getMode(redValues);
+          const modeGreen = getMode(greenValues);
+          const modeBlue = getMode(blueValues);
 
-            outputData[pixelIndex] = modeRed;
-            outputData[pixelIndex + 1] = modeGreen;
-            outputData[pixelIndex + 2] = modeBlue;
-        }
-    }
+          // Atribui os valores moda de cor ao pixel atual
+          outputData[pixelIndex] = modeRed;
+          outputData[pixelIndex + 1] = modeGreen;
+          outputData[pixelIndex + 2] = modeBlue;
+      }
+  }
 
-    return new ImageData(outputData, width, height);
+  return new ImageData(outputData, width, height); // Retorna uma nova imagem com o filtro de moda aplicado
 }
 
+/**
+* Obtém a moda de um array de valores.
+* @param values O array de valores.
+* @returns O valor moda do array.
+*/
 function getMode(values: number[]): number {
-    const countMap = new Map<number, number>();
+  const countMap = new Map<number, number>(); // Mapa para contar a ocorrência de cada valor
 
-    for (const value of values) {
-        if (countMap.has(value)) {
-            countMap.set(value, countMap.get(value)! + 1);
-        } else {
-            countMap.set(value, 1);
-        }
-    }
+  // Conta a ocorrência de cada valor no array
+  for (const value of values) {
+      if (countMap.has(value)) {
+          countMap.set(value, countMap.get(value)! + 1);
+      } else {
+          countMap.set(value, 1);
+      }
+  }
 
-    let mode = values[0];
-    let maxCount = countMap.get(mode)!;
+  let mode = values[0]; // Inicializa o valor moda como o primeiro valor do array
+  let maxCount = countMap.get(mode)!; // Inicializa a contagem máxima como a contagem do primeiro valor
 
-    for (const [value, count] of countMap) {
-        if (count > maxCount) {
-            mode = value;
-            maxCount = count;
-        }
-    }
+  // Encontra o valor moda e sua contagem
+  for (const [value, count] of countMap) {
+      if (count > maxCount) {
+          mode = value;
+          maxCount = count;
+      }
+  }
 
-    return mode;
+  return mode; // Retorna o valor moda
 }
+
 
 
 // Componente Home
@@ -217,6 +237,7 @@ export default function Home() {
             <label>
               Tamanho do Kernel:
               <input
+                step={2}
                 type="number"
                 value={kernelSize}
                 min={1}
