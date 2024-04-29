@@ -36,7 +36,7 @@ function applyMedianFilter(
   // Loop pelos pixels verticais e horizontais da imagem, excluindo as bordas
   for (let y = halfKernelSize; y < height - halfKernelSize; y++) {
     for (let x = halfKernelSize; x < width - halfKernelSize; x++) {
-      const pixelIndex = (y * width + x) * 4; // Calcula o índice do pixel atual no array de dados da imagem (cada pixel tem 4 componentes: RGBA)
+      const pixelIndex = (y * width + x) * 4; // Calcula o índice do pixel atual no array de dados da imagem (cada pixel tem 4 componentes: RGBA) Matriz Linear e não bidmensional
 
       // Inicializa arrays para armazenar os valores de cor dos vizinhos do pixel atual
       const redValues: number[] = [];
@@ -235,8 +235,18 @@ export default function Home() {
           />
         </label>
         <div className={styles.imagens}>
-          {originalImage && <img src={originalImage} alt="Original" />}
-          {filteredImage && <img src={filteredImage} alt="Filtered" />}
+        {originalImage && (
+            <div>
+              <h2>Original</h2>
+              <img src={originalImage} alt="Original" />
+            </div>
+          )}
+          {filteredImage && (
+            <div>
+              <h2>Filtrada</h2>
+              <img src={filteredImage} alt="Filtered" />
+            </div>
+          )}
         </div>
       </main>
     </>

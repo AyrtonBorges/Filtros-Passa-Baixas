@@ -5,7 +5,6 @@ import styles from "../styles/Home.module.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-
 /**
  * Aplica um filtro de média à imagem.
  * @param {ImageData} imageData Os dados da imagem a serem filtrados.
@@ -18,15 +17,16 @@ function applyAverageFilter(
   imageData: ImageData,
   width: number,
   height: number,
-  kernelSize: number
+  kernelSize: number,
+  mode: number
 ): ImageData {
   const outputData = new Uint8ClampedArray(imageData.data); // Cria um novo array de bytes para os dados da imagem filtrada, copiando os dados da imagem original
-  const halfKernelSize = Math.floor(kernelSize / 2);        // Calcula a metade do tamanho do kernel
+  const halfKernelSize = Math.floor(kernelSize / 2); // Calcula a metade do tamanho do kernel
 
   //Loop pelos pixels verticais e horizontais da imagem, excluindo as bordas
   for (let y = halfKernelSize; y < height - halfKernelSize; y++) {
     for (let x = halfKernelSize; x < width - halfKernelSize; x++) {
-      const pixelIndex = (y * width + x) * 4; // Calcula o índice do pixel atual no array de dados da imagem (cada pixel tem 4 componentes: RGBA)
+      const pixelIndex = (y * width + x) * 4; // Calcula o índice do pixel atual no array de dados da imagem (cada pixel tem 4 componentes: RGBA) Matriz Linear e não bidmensional
 
       //Inizializa a soma total dos componentes de cor dos pixels vizinhos
       let totalRed = 0;
@@ -39,17 +39,45 @@ function applyAverageFilter(
           const neighborPixelIndex = ((y + ky) * width + (x + kx)) * 4; // Calcula o índice do vizinho atual no array de dados da imagem
 
           // Soma os componentes de cor do vizinho atual
-          totalRed += imageData.data[neighborPixelIndex]; 
-          totalGreen += imageData.data[neighborPixelIndex + 1];
-          totalBlue += imageData.data[neighborPixelIndex + 2];
+          if (mode === 9) {
+            totalRed += imageData.data[neighborPixelIndex];
+            totalGreen += imageData.data[neighborPixelIndex + 1];
+            totalBlue += imageData.data[neighborPixelIndex + 2];
+          } else if (mode === 5) {
+            if (
+              (kx === 1 && ky === 0) ||
+              (kx === 0 && ky === 0) ||
+              (kx === -1 && ky === 1) ||
+              (kx === 1 && ky === 1)
+            ) {
+            } else {
+              totalRed += imageData.data[neighborPixelIndex];
+              totalGreen += imageData.data[neighborPixelIndex + 1];
+              totalBlue += imageData.data[neighborPixelIndex + 2];
+            }
+          } else if (mode === 10) {
+            if (kx === 0 && ky === 0) {
+              totalRed += imageData.data[neighborPixelIndex] * 2;
+              totalGreen += imageData.data[neighborPixelIndex + 1] * 2;
+              totalBlue += imageData.data[neighborPixelIndex + 2] * 2;
+            }
+          }
         }
       }
 
       // Calcula a média dos componentes de cor dos pixels vizinhos
-      const averageRed = Math.round(totalRed / (kernelSize * kernelSize));
-      const averageGreen = Math.round(totalGreen / (kernelSize * kernelSize));
-      const averageBlue = Math.round(totalBlue / (kernelSize * kernelSize));
-
+      let averageRed;
+      let averageGreen;
+      let averageBlue;
+      if (mode === 9) {
+        averageRed = Math.round(totalRed / (kernelSize * kernelSize));
+        averageGreen = Math.round(totalGreen / (kernelSize * kernelSize));
+        averageBlue = Math.round(totalBlue / (kernelSize * kernelSize));
+      } else {
+        averageRed = Math.round(totalRed / mode);
+        averageGreen = Math.round(totalGreen / mode);
+        averageBlue = Math.round(totalBlue / mode);
+      }
       // Atribui a média dos componentes de cor ao pixel atual
       outputData[pixelIndex] = averageRed;
       outputData[pixelIndex + 1] = averageGreen;
@@ -66,6 +94,8 @@ export default function Home() {
   const [originalSave, setOriginalSave] = useState<string | null>(null);
   const [filteredImage, setFilteredImage] = useState<string | null>(null);
   const [kernelSize, setKernelSize] = useState<number>(3);
+  const [mode, setMode] = useState<number>(9);
+
   // Função para carregar a imagem e aplicar o filtro
   function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -106,7 +136,8 @@ export default function Home() {
                 imageData,
                 img.width,
                 img.height,
-                3
+                3,
+                mode
               ); // Altere o tamanho do kernel conforme necessário
               canvas.width = width;
               canvas.height = height;
@@ -164,7 +195,8 @@ export default function Home() {
             imageData,
             img.width,
             img.height,
-            kernelSize
+            kernelSize,
+            mode
           );
           canvas.width = width;
           canvas.height = height;
@@ -185,12 +217,19 @@ export default function Home() {
         }
       };
     }
-  }, [originalSave, kernelSize]);
+  }, [originalSave, kernelSize, mode]);
 
   function handleKernelSizeChange(event: React.ChangeEvent<HTMLInputElement>) {
     const size = parseInt(event.target.value);
     if (!isNaN(size)) {
       setKernelSize(size);
+    }
+  }
+
+  function handleModeChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    const mode = parseInt(event.target.value);
+    if (!isNaN(mode)) {
+      setMode(mode);
     }
   }
 
@@ -205,6 +244,11 @@ export default function Home() {
       <main className={`${styles.main} ${inter.className}`}>
         <h1>Filtro lineare passa-baixa Média</h1>
         <input type="file" accept="image/*" onChange={handleImageUpload} />
+        <select value={mode} onChange={handleModeChange}>
+          <option value={9}>9</option>
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+        </select>
         <label>
           Tamanho do Kernel:
           <input
@@ -216,8 +260,18 @@ export default function Home() {
           />
         </label>
         <div className={styles.imagens}>
-          {originalImage && <img src={originalImage} alt="Original" />}
-          {filteredImage && <img src={filteredImage} alt="Filtered" />}
+          {originalImage && (
+            <div>
+              <h2>Original</h2>
+              <img src={originalImage} alt="Original" />
+            </div>
+          )}
+          {filteredImage && (
+            <div>
+              <h2>Filtrada</h2>
+              <img src={filteredImage} alt="Filtered" />
+            </div>
+          )}
         </div>
       </main>
     </>
