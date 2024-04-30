@@ -19,6 +19,9 @@ const Navbar = () => {
         <li className={styles.navItem}>
           <Link legacyBehavior href="/mediana">Mediana</Link>
         </li>
+        <li className={styles.navItem}>
+          <Link legacyBehavior href="/passa-alta">Passa Alta</Link>
+        </li>
       </ul>
     </nav>
   );

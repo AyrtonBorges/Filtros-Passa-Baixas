@@ -2,6 +2,7 @@ import Head from "next/head";
 import { Inter } from "next/font/google";
 import styles from "../styles/Home.module.css";
 import Link from "next/link";
+import Navbar from "../components/NavBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,6 +35,13 @@ export default function Home() {
             <label className={styles.neonBtn} htmlFor="valueIs-2">
               <span className={styles.span}></span>
               <span className={styles.txt}>Mediana</span>
+            </label>
+          </Link>
+          <Link href="/passa-alta">
+            <input className={styles.inputBtn} type="radio" id="valueIs-2" name="valueIs-radio" value="valueIs-2" />
+            <label className={styles.neonBtn} htmlFor="valueIs-2">
+              <span className={styles.span}></span>
+              <span className={styles.txt}>Passa Alta</span>
             </label>
           </Link>
         </form>
