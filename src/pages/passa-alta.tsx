@@ -87,20 +87,18 @@ function applyAverageFilter(
         }
       }
 
-      // Calcula a média dos componentes de cor dos pixels vizinhos
-      let averageRed;
-      let averageGreen;
-      let averageBlue;
+      let Red;
+      let Green;
+      let Blue;
       if (mode === 1 || mode === 2 || mode === 3) {
-        averageRed = totalRed;
-        averageGreen = totalGreen;
-        averageBlue = totalBlue;
+        Red = totalRed;
+        Green = totalGreen;
+        Blue = totalBlue;
       }
 
-      // Atribui a média dos componentes de cor ao pixel atual
-      outputData[pixelIndex] = averageRed;
-      outputData[pixelIndex + 1] = averageGreen;
-      outputData[pixelIndex + 2] = averageBlue;
+      outputData[pixelIndex] = Red;
+      outputData[pixelIndex + 1] = Green;
+      outputData[pixelIndex + 2] = Blue;
     }
   }
 

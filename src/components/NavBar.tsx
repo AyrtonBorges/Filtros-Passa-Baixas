@@ -22,6 +22,9 @@ const Navbar = () => {
         <li className={styles.navItem}>
           <Link legacyBehavior href="/passa-alta">Passa Alta</Link>
         </li>
+        <li className={styles.navItem}>
+          <Link legacyBehavior href="/logicas">Operador Lógico</Link>
+        </li>
       </ul>
     </nav>
   );

@@ -44,6 +44,13 @@ export default function Home() {
               <span className={styles.txt}>Passa Alta</span>
             </label>
           </Link>
+          <Link href="/logicas">
+            <input className={styles.inputBtn} type="radio" id="valueIs-2" name="valueIs-radio" value="valueIs-2" />
+            <label className={styles.neonBtn} htmlFor="valueIs-2">
+              <span className={styles.span}></span>
+              <span className={styles.txt}>Ope. lógico</span>
+            </label>
+          </Link>
         </form>
     </>
   );
