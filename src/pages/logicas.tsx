@@ -49,10 +49,33 @@ function applyFilter(
           imageData1.data[pixelIndex + 1] ^ imageData2.data[pixelIndex + 1]; // Componente verde
         outputData[pixelIndex + 2] =
           imageData1.data[pixelIndex + 2] ^ imageData2.data[pixelIndex + 2]; // Componente azul
-      } else {
+      } else if (mode === 4) {
         outputData[pixelIndex] = 255 - imageData1.data[pixelIndex]; // Componente vermelho
         outputData[pixelIndex + 1] = 255 - imageData1.data[pixelIndex + 1]; // Componente verde
         outputData[pixelIndex + 2] = 255 - imageData1.data[pixelIndex + 2]; // Componente azul
+      } else if (mode === 5) {
+        outputData[pixelIndex] = Math.min(
+          imageData1.data[pixelIndex] + imageData2.data[pixelIndex],
+          255
+        ); // Componente vermelho
+        outputData[pixelIndex + 1] = Math.min(
+          imageData1.data[pixelIndex + 1] + imageData2.data[pixelIndex + 1],
+          255
+        ); // Componente verde
+        outputData[pixelIndex + 2] = Math.min(
+          imageData1.data[pixelIndex + 2] + imageData2.data[pixelIndex + 2],
+          255
+        ); // Componente azul
+      } else if (mode === 6) {
+        outputData[pixelIndex] = Math.abs(
+          imageData1.data[pixelIndex] - imageData2.data[pixelIndex]
+        ); // Componente vermelho
+        outputData[pixelIndex + 1] = Math.abs(
+          imageData1.data[pixelIndex + 1] - imageData2.data[pixelIndex + 1]
+        ); // Componente verde
+        outputData[pixelIndex + 2] = Math.abs(
+          imageData1.data[pixelIndex + 2] - imageData2.data[pixelIndex + 2]
+        ); // Componente azul
       }
     }
   }
@@ -278,81 +301,157 @@ export default function Home() {
         };
       }
     } else if (mode === 2) {
-        if (originalSave) {
-            const img = new Image();
-            img.src = originalSave;
-            img.onload = () => {
-              if (originalSave2) {
-                const img2 = new Image();
-                img2.src = originalSave2;
-                img2.onload = () => {};
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-                if (ctx) {
-                  const maxWidth = 500;
-                  const maxHeight = 500;
-                  canvas.width = maxWidth;
-                  canvas.height = maxHeight;
-                  ctx.drawImage(img, 0, 0, maxWidth, maxHeight);
-                  const imageData1 = ctx.getImageData(0, 0, img.width, img.height);
-                  ctx.drawImage(img2, 0, 0, maxWidth, maxHeight);
-                  const imageData2 = ctx.getImageData(0, 0, img.width, img.height);
-                  const filteredMascaraZero1 = applyFilter(
-                    imageData1,
-                    imageData1,
-                    img.width,
-                    img.height,
-                    kernelSize,
-                    4
-                  );
-                  canvas.width = maxWidth;
-                  canvas.height = maxHeight;
-                  ctx.putImageData(filteredMascaraZero1, 0, 0);
-                  let filteredImagePath = canvas.toDataURL("image/jpeg");
-                  let canvasFiltered = document.createElement("canvas");
-                  let ctxFiltered = canvasFiltered.getContext("2d");
-                  if (ctxFiltered) {
-                    canvasFiltered.width = img.width;
-                    canvasFiltered.height = img.height;
-                    ctxFiltered.putImageData(filteredMascaraZero1, 0, 0);
-                    const filteredImagePath =
-                      canvasFiltered.toDataURL("image/jpeg");
-                    // Salvar o caminho da imagem filtrada
-                    setFilteredImage1(filteredImagePath);
-                  }
-                  ctx.drawImage(canvasFiltered, 0, 0, maxWidth, maxHeight);
-                  setFilteredImage1(canvas.toDataURL("image/jpeg"));
-    
-                  const filteredMascaraZero2 = applyFilter(
-                    imageData2,
-                    imageData2,
-                    img.width,
-                    img.height,
-                    kernelSize,
-                    4
-                  );
-                  canvas.width = maxWidth;
-                  canvas.height = maxHeight;
-                  ctx.putImageData(filteredMascaraZero2, 0, 0);
-                  filteredImagePath = canvas.toDataURL("image/jpeg");
-                  canvasFiltered = document.createElement("canvas");
-                  ctxFiltered = canvasFiltered.getContext("2d");
-                  if (ctxFiltered) {
-                    canvasFiltered.width = img.width;
-                    canvasFiltered.height = img.height;
-                    ctxFiltered.putImageData(filteredMascaraZero2, 0, 0);
-                    const filteredImagePath =
-                      canvasFiltered.toDataURL("image/jpeg");
-                    // Salvar o caminho da imagem filtrada
-                    setFilteredImage2(filteredImagePath);
-                  }
-                  ctx.drawImage(canvasFiltered, 0, 0, maxWidth, maxHeight);
-                  setFilteredImage2(canvas.toDataURL("image/jpeg"));
-                  setFilteredImage3(null);
-                }
+      if (originalSave) {
+        const img = new Image();
+        img.src = originalSave;
+        img.onload = () => {
+          if (originalSave2) {
+            const img2 = new Image();
+            img2.src = originalSave2;
+            img2.onload = () => {};
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              const maxWidth = 500;
+              const maxHeight = 500;
+              canvas.width = maxWidth;
+              canvas.height = maxHeight;
+              ctx.drawImage(img, 0, 0, maxWidth, maxHeight);
+              const imageData1 = ctx.getImageData(0, 0, img.width, img.height);
+              ctx.drawImage(img2, 0, 0, maxWidth, maxHeight);
+              const imageData2 = ctx.getImageData(0, 0, img.width, img.height);
+              const filteredMascaraZero1 = applyFilter(
+                imageData1,
+                imageData1,
+                img.width,
+                img.height,
+                kernelSize,
+                4
+              );
+              canvas.width = maxWidth;
+              canvas.height = maxHeight;
+              ctx.putImageData(filteredMascaraZero1, 0, 0);
+              let filteredImagePath = canvas.toDataURL("image/jpeg");
+              let canvasFiltered = document.createElement("canvas");
+              let ctxFiltered = canvasFiltered.getContext("2d");
+              if (ctxFiltered) {
+                canvasFiltered.width = img.width;
+                canvasFiltered.height = img.height;
+                ctxFiltered.putImageData(filteredMascaraZero1, 0, 0);
+                const filteredImagePath =
+                  canvasFiltered.toDataURL("image/jpeg");
+                // Salvar o caminho da imagem filtrada
+                setFilteredImage1(filteredImagePath);
               }
-            };
+              ctx.drawImage(canvasFiltered, 0, 0, maxWidth, maxHeight);
+              setFilteredImage1(canvas.toDataURL("image/jpeg"));
+
+              const filteredMascaraZero2 = applyFilter(
+                imageData2,
+                imageData2,
+                img.width,
+                img.height,
+                kernelSize,
+                4
+              );
+              canvas.width = maxWidth;
+              canvas.height = maxHeight;
+              ctx.putImageData(filteredMascaraZero2, 0, 0);
+              filteredImagePath = canvas.toDataURL("image/jpeg");
+              canvasFiltered = document.createElement("canvas");
+              ctxFiltered = canvasFiltered.getContext("2d");
+              if (ctxFiltered) {
+                canvasFiltered.width = img.width;
+                canvasFiltered.height = img.height;
+                ctxFiltered.putImageData(filteredMascaraZero2, 0, 0);
+                const filteredImagePath =
+                  canvasFiltered.toDataURL("image/jpeg");
+                // Salvar o caminho da imagem filtrada
+                setFilteredImage2(filteredImagePath);
+              }
+              ctx.drawImage(canvasFiltered, 0, 0, maxWidth, maxHeight);
+              setFilteredImage2(canvas.toDataURL("image/jpeg"));
+              setFilteredImage3(null);
+            }
           }
+        };
+      }
+    } else if (mode === 3) {
+      if (originalSave) {
+        const img = new Image();
+        img.src = originalSave;
+        img.onload = () => {
+          if (originalSave2) {
+            const img2 = new Image();
+            img2.src = originalSave2;
+            img2.onload = () => {};
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              const maxWidth = 500;
+              const maxHeight = 500;
+              canvas.width = maxWidth;
+              canvas.height = maxHeight;
+              ctx.drawImage(img, 0, 0, maxWidth, maxHeight);
+              const imageData1 = ctx.getImageData(0, 0, img.width, img.height);
+              ctx.drawImage(img2, 0, 0, maxWidth, maxHeight);
+              const imageData2 = ctx.getImageData(0, 0, img.width, img.height);
+              const filteredMascaraZero1 = applyFilter(
+                imageData1,
+                imageData2,
+                img.width,
+                img.height,
+                kernelSize,
+                5
+              );
+              canvas.width = maxWidth;
+              canvas.height = maxHeight;
+              ctx.putImageData(filteredMascaraZero1, 0, 0);
+              let filteredImagePath = canvas.toDataURL("image/jpeg");
+              let canvasFiltered = document.createElement("canvas");
+              let ctxFiltered = canvasFiltered.getContext("2d");
+              if (ctxFiltered) {
+                canvasFiltered.width = img.width;
+                canvasFiltered.height = img.height;
+                ctxFiltered.putImageData(filteredMascaraZero1, 0, 0);
+                const filteredImagePath =
+                  canvasFiltered.toDataURL("image/jpeg");
+                // Salvar o caminho da imagem filtrada
+                setFilteredImage1(filteredImagePath);
+              }
+              ctx.drawImage(canvasFiltered, 0, 0, maxWidth, maxHeight);
+              setFilteredImage1(canvas.toDataURL("image/jpeg"));
+
+              const filteredMascaraZero2 = applyFilter(
+                imageData1,
+                imageData2,
+                img.width,
+                img.height,
+                kernelSize,
+                6
+              );
+              canvas.width = maxWidth;
+              canvas.height = maxHeight;
+              ctx.putImageData(filteredMascaraZero2, 0, 0);
+              filteredImagePath = canvas.toDataURL("image/jpeg");
+              canvasFiltered = document.createElement("canvas");
+              ctxFiltered = canvasFiltered.getContext("2d");
+              if (ctxFiltered) {
+                canvasFiltered.width = img.width;
+                canvasFiltered.height = img.height;
+                ctxFiltered.putImageData(filteredMascaraZero2, 0, 0);
+                const filteredImagePath =
+                  canvasFiltered.toDataURL("image/jpeg");
+                // Salvar o caminho da imagem filtrada
+                setFilteredImage2(filteredImagePath);
+              }
+              ctx.drawImage(canvasFiltered, 0, 0, maxWidth, maxHeight);
+              setFilteredImage2(canvas.toDataURL("image/jpeg"));
+              setFilteredImage3(null);
+            }
+          }
+        };
+      }
     }
   }, [originalSave, originalSave2, kernelSize, mode]);
 
@@ -386,6 +485,7 @@ export default function Home() {
         <select value={mode} onChange={handleModeChange}>
           <option value={1}>AND/OR/NOR</option>
           <option value={2}>NOT</option>
+          <option value={3}>Operção:Soma/Subtração</option>
         </select>
         {/* <label>
           Tamanho do Kernel:
