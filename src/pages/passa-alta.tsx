@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ["latin"] });
  * @param {number} kernelSize O tamanho do kernel do filtro.
  * @return {*}  {ImageData} Uma nova imagem com o filtro de média aplicado.
  */
-function applyAverageFilter(
+function applyFilterPassaAltaLinear(
   imageData: ImageData,
   width: number,
   height: number,
@@ -107,8 +107,10 @@ function applyAverageFilter(
 
 // Função para aplicar o Filtro de Roberts
 function applyRobertsFilter(imageData, width, height) {
+  // Cria uma cópia da matriz de dados da imagem
   const outputData = new Uint8ClampedArray(imageData.data);
 
+  // Define os kernels Roberts para detecção de bordas em X e Y
   const robertsX = [
     [0, 0, -1],
     [0, 1, 0],
@@ -121,16 +123,21 @@ function applyRobertsFilter(imageData, width, height) {
     [0, 0, 0]
   ];
 
+  // Função para realizar a convolução entre um pixel e um kernel
   function convolution(x, y, p, kernel) {
     let sum = 0;
+    // Loop pelos vizinhos do pixel
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
+        // Calcula o índice do pixel vizinho na matriz de dados da imagem
         const pixelIndex = ((y + j) * width + (x + i)) * 4;
+        // Obtém o valor do canal de cor especificado (R, G ou B) do pixel
         const value = imageData.data[pixelIndex + p];
+        // Realiza a multiplicação do valor do pixel pelo valor correspondente no kernel
         sum += value * kernel[j + 1][i + 1];
       }
     }
-    return sum;
+    return sum; // Retorna o resultado da convolução
   }
 
   // Função para normalizar um valor entre 0 e 255
@@ -138,9 +145,12 @@ function applyRobertsFilter(imageData, width, height) {
     return Math.max(0, Math.min(255, value));
   }
 
+  // Loop pelos pixels da imagem, excluindo a borda
   for (let y = 1; y < height - 1; y++) {
     for (let x = 1; x < width - 1; x++) {
+      // Calcula o índice do pixel atual na matriz de dados da imagem
       const pixelIndex = (y * width + x) * 4;
+      // Calcula o gradiente para os canais de cor R, G e B separadamente usando os kernels Roberts
       let totalRed = convolution(x, y, 0, robertsX);
       let tempCalculo = convolution(x, y, 0, robertsY);
       totalRed = Math.sqrt(totalRed * totalRed + tempCalculo * tempCalculo);
@@ -151,21 +161,21 @@ function applyRobertsFilter(imageData, width, height) {
       tempCalculo = convolution(x, y, 2, robertsY);
       totalBlue = Math.sqrt(totalBlue * totalBlue + tempCalculo * tempCalculo);
 
-      
-      // Normaliza o gradiente para o intervalo entre 0 e 255
+      // Normaliza os valores dos gradientes para o intervalo entre 0 e 255
       const tempRed = normalize(totalRed);
       const tempGreen = normalize(totalGreen);
       const tempBlue = normalize(totalBlue);
-      
+
+      // Atualiza os valores dos canais de cor na matriz de dados de saída
       outputData[pixelIndex] = tempRed;
       outputData[pixelIndex + 1] = tempGreen;
       outputData[pixelIndex + 2] = tempBlue;
     }
   }
 
+  // Retorna a nova matriz de dados da imagem após aplicar o filtro Roberts
   return new ImageData(outputData, width, height);
 }
-
 
 // Função para aplicar o Filtro de Sobel
 function applySobelFilter(imageData, width, height) {
@@ -185,15 +195,67 @@ function applySobelFilter(imageData, width, height) {
 
   function convolution(x, y, p, kernel) {
     let sum = 0;
+    // Loop pelos vizinhos do pixel
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
+        // Calcula o índice do pixel vizinho na matriz de dados da imagem
         const pixelIndex = ((y + j) * width + (x + i)) * 4;
+        // Obtém o valor do canal de cor especificado (R, G ou B) do pixel
         const value = imageData.data[pixelIndex + p];
-        sum += value * kernel[j + 1][i + 1];
+        // Realiza a multiplicação do valor do pixel pelo valor correspondente no kernel
+        sum += (value * kernel[j + 1][i + 1])/4.0;
       }
     }
-    return sum;
+    return sum/2.0; // Retorna o resultado da convolução
   }
+
+  // function convolution(x, y, p, kernel) {
+  //   let sum = 0;
+  //   // Loop pelos vizinhos do pixel
+  //   for (let i = -1; i <= 1; i++) {
+  //     for (let j = -1; j <= 1; j++) {
+  //       // Calcula o índice do pixel vizinho na matriz de dados da imagem
+  //       const pixelIndex = ((y + j) * width + (x + i)) * 4;
+  //       // Obtém o valor do canal de cor especificado (R, G ou B) do pixel
+  //       const value = imageData.data[pixelIndex + p];
+  //       // Realiza a multiplicação do valor do pixel pelo valor correspondente no kernel
+  //       sum += value * kernel[j + 1][i + 1];
+  //     }
+  //   }
+  //   return sum; // Retorna o resultado da convolução
+  // }
+
+  // function convolution(x, y, p, kernel) {
+  //   let sum1 = 0;
+  //   let sum2 = 0;
+  //   for (let i = -1; i <= 1; i++) {
+  //     for (let j = -1; j <= 1; j++) {
+  //       const pixelIndex = ((y + j) * width + (x + i)) * 4;
+  //       const value = imageData.data[pixelIndex + p];
+  //       if(i < 0)
+  //         sum1 += value * kernel[j + 1][i + 1];
+  //       else
+  //         sum2 += value * kernel[j + 1][i + 1];
+  //     }
+  //   }
+  //   return ((sum1/4.0) + (sum2/4.0))/2.0;
+  // }
+
+  // function convolution2(x, y, p, kernel) {
+  //   let sum1 = 0;
+  //   let sum2 = 0;
+  //   for (let i = -1; i <= 1; i++) {
+  //     for (let j = -1; j <= 1; j++) {
+  //       const pixelIndex = ((y + j) * width + (x + i)) * 4;
+  //       const value = imageData.data[pixelIndex + p];
+  //       if(i < 0)
+  //         sum1 += value * kernel[i + 1][j + 1];
+  //       else
+  //         sum2 += value * kernel[i + 1][j + 1];
+  //     }
+  //   }
+  //   return ((sum1/4.0) + (sum2/4.0))/2.0;
+  // }
 
   // Função para normalizar um valor entre 0 e 255
   function normalize(value) {
@@ -205,13 +267,13 @@ function applySobelFilter(imageData, width, height) {
       const pixelIndex = (y * width + x) * 4;
       let totalRed = convolution(x, y, 0, sobelX);
       let tempCalculo = convolution(x, y, 0, sobelY);
-      totalRed = Math.sqrt(totalRed * totalRed + tempCalculo * tempCalculo);
+      totalRed = Math.sqrt((totalRed * totalRed) + (tempCalculo * tempCalculo));
       let totalGreen = convolution(x, y, 1, sobelX);
       tempCalculo = convolution(x, y, 1, sobelY);
-      totalGreen = Math.sqrt(totalGreen * totalGreen + tempCalculo * tempCalculo);
+      totalGreen = Math.sqrt((totalGreen * totalGreen) + (tempCalculo * tempCalculo));
       let totalBlue = convolution(x, y, 2, sobelX);
       tempCalculo = convolution(x, y, 2, sobelY);
-      totalBlue = Math.sqrt(totalBlue * totalBlue + tempCalculo * tempCalculo);
+      totalBlue = Math.sqrt((totalBlue * totalBlue) + (tempCalculo * tempCalculo));
 
       
       // Normaliza o gradiente para o intervalo entre 0 e 255
@@ -312,7 +374,7 @@ export default function Home() {
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0, img.width, img.height);
             const imageData = ctx.getImageData(0, 0, img.width, img.height);
-            const filteredMascaraZero1 = applyAverageFilter(
+            const filteredMascaraZero1 = applyFilterPassaAltaLinear(
               imageData,
               img.width,
               img.height,
@@ -336,7 +398,7 @@ export default function Home() {
             ctx.drawImage(canvasFiltered, 0, 0, width, height);
             setFilteredImage1(canvas.toDataURL("image/jpeg"));
 
-            const filteredMascaraZero2 = applyAverageFilter(
+            const filteredMascaraZero2 = applyFilterPassaAltaLinear(
               imageData,
               img.width,
               img.height,
@@ -359,7 +421,7 @@ export default function Home() {
             }
             ctx.drawImage(canvasFiltered, 0, 0, width, height);
             setFilteredImage2(canvas.toDataURL("image/jpeg"));
-            const filteredMascaraZero3 = applyAverageFilter(
+            const filteredMascaraZero3 = applyFilterPassaAltaLinear(
               imageData,
               img.width,
               img.height,
