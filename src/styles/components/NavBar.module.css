@@ -8,6 +8,8 @@
   .navbarNav {
     list-style-type: none;
     display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
   
   .navItem {
@@ -21,5 +23,12 @@
   
   .navLink:hover {
     text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    .navbarNav {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
   
